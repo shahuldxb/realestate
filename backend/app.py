@@ -49,8 +49,11 @@ def health():
 def debug_db():
     try:
         db_name = execute_query("SELECT DB_NAME() as db_name")
-        tables = execute_query("SELECT TOP 10 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' ORDER BY TABLE_NAME")
-        return jsonify({"database": db_name, "tables": serialize_rows(tables), "env_db": os.getenv('SQL_DATABASE')})
+        schema = execute_query("SELECT SCHEMA_NAME() as schema_name")
+        user = execute_query("SELECT USER_NAME() as user_name, SUSER_SNAME() as login_name")
+        tables_sys = execute_query("SELECT TOP 10 s.name as schema_name, t.name as table_name FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id ORDER BY t.name")
+        tables_info = execute_query("SELECT TOP 10 TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' ORDER BY TABLE_NAME")
+        return jsonify({"database": db_name, "schema": schema, "user": user, "tables_sys": serialize_rows(tables_sys), "tables_info": serialize_rows(tables_info), "env_db": os.getenv('SQL_DATABASE')})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
