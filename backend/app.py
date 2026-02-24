@@ -12,7 +12,7 @@ load_dotenv()
 
 # Serve React frontend from the 'static_frontend' directory
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static_frontend')
-app = Flask(__name__, static_folder=static_dir, static_url_path='')
+app = Flask(__name__, static_folder=None)
 CORS(app)
 
 # Custom JSON encoder for dates and decimals
