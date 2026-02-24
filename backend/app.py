@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime, date
 from decimal import Decimal
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 from db import execute_query, execute_insert
@@ -10,7 +10,9 @@ from ai_service import chat_with_ai, execute_ai_mutation
 
 load_dotenv()
 
-app = Flask(__name__)
+# Serve React frontend from the 'static_frontend' directory
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static_frontend')
+app = Flask(__name__, static_folder=static_dir, static_url_path='')
 CORS(app)
 
 # Custom JSON encoder for dates and decimals
@@ -866,6 +868,20 @@ register_facility_routes(app)
 
 from teller_cheque_routes import register_teller_cheque_routes
 register_teller_cheque_routes(app)
+
+# Serve React frontend - catch-all route for SPA
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    # If the path starts with 'api/', let Flask handle it (already handled above)
+    if path.startswith('api/'):
+        return jsonify({"error": "Not found"}), 404
+    # Try to serve the file from static_frontend
+    file_path = os.path.join(static_dir, path)
+    if path and os.path.isfile(file_path):
+        return send_from_directory(static_dir, path)
+    # For all other routes, serve index.html (SPA routing)
+    return send_from_directory(static_dir, 'index.html')
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))

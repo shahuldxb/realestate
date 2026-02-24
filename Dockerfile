@@ -1,6 +1,23 @@
+# ============================================================
+# Stage 1: Build the React frontend
+# ============================================================
+FROM node:22-slim AS frontend-build
+
+WORKDIR /frontend
+
+# Copy frontend files
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install
+
+COPY frontend/ ./
+RUN pnpm run build
+
+# ============================================================
+# Stage 2: Python backend + serve frontend static files
+# ============================================================
 FROM python:3.11-slim
 
-# Install system dependencies for pyodbc / ODBC Driver 17
+# Install ODBC Driver 17 for SQL Server
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         curl apt-transport-https gnupg2 unixodbc-dev gcc g++ && \
@@ -12,10 +29,15 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Install Python dependencies
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy backend code
+COPY backend/ .
+
+# Copy built frontend into backend's static_frontend directory
+COPY --from=frontend-build /frontend/dist/public ./static_frontend
 
 # Render sets PORT dynamically; default to 10000 if not set
 ENV PORT=10000
