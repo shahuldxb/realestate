@@ -45,6 +45,15 @@ def health():
     except Exception as e:
         return jsonify({"status": "unhealthy", "database": str(e)}), 500
 
+@app.route("/api/debug-db", methods=["GET"])
+def debug_db():
+    try:
+        db_name = execute_query("SELECT DB_NAME() as db_name")
+        tables = execute_query("SELECT TOP 10 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' ORDER BY TABLE_NAME")
+        return jsonify({"database": db_name, "tables": serialize_rows(tables), "env_db": os.getenv('SQL_DATABASE')})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # ============================================================================
 # DASHBOARD - Aggregate stats
 # ============================================================================
