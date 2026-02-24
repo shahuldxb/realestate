@@ -12,7 +12,7 @@ def _conn_str():
     return (
         f"DRIVER={os.getenv('SQL_DRIVER')};"
         f"SERVER={os.getenv('SQL_SERVER')};"
-        f"DATABASE={os.getenv('SQL_DATABASE', 'bms')};"
+        f"DATABASE=bms;"
         f"UID={os.getenv('SQL_USERNAME')};"
         f"PWD={os.getenv('SQL_PASSWORD')};"
         "TrustServerCertificate=yes;"
