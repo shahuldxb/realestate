@@ -73,8 +73,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 py-1.5">
-          <nav className="px-1.5">
+        <ScrollArea className="flex-1 overflow-hidden">
+          <nav className="px-1.5 py-1.5">
             {/* Dashboard */}
             {collapsed ? (
               <Tooltip delayDuration={0}>
